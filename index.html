@@ -333,6 +333,7 @@ main{margin:0 auto;max-width:600px;padding:66px 12px 80px;}
 .tx-delete-reveal svg{ color:#fff; }
 .tx-delete-reveal span{ font-size:8px;font-weight:700;letter-spacing:.4px;color:rgba(255,255,255,.8);text-transform:uppercase; }
 
+.tx-swipe-wrap{
   position:relative;overflow:hidden;border-radius:var(--r-sm);
   margin-bottom:6px;
 }
@@ -3954,6 +3955,7 @@ function refresh(){
   (function(){
     var sorted=Object.entries(cm).sort(function(a,b){return b[1]-a[1];});
     if(!sorted.length){document.getElementById('catBars').innerHTML='<div style="color:var(--text3);font-size:11px;padding:10px 0">Sin gastos este mes.</div>';return;}
+    var medals=['\u{1F947}','\u{1F948}','\u{1F949}'];
     var podiumColors=['#fbbf24','#94a3b8','#cd7c4a'];
     var heights=['h1','h2','h3'];
     var orderClass=['second','first','third'];
@@ -3961,6 +3963,7 @@ function refresh(){
     var podHtml='<div class="cat-podium">';
     [1,0,2].forEach(function(ri){
       var e=top3[ri]; if(!e)return;
+      var p=tG>0?Math.round((e[1]/tG)*100):0;
       var col=podiumColors[ri];
       var emoji=e[0]?e[0].split(' ')[0]:'\u{1F4E6}';
       var name=e[0]?e[0].replace(/^\S+\s*/,''):e[0];
@@ -3968,12 +3971,35 @@ function refresh(){
         '<div class="cat-podium-emoji">'+emoji+'</div>'+
         '<div class="cat-podium-name">'+name+'</div>'+
         '<div class="cat-podium-amt" style="color:'+col+';">'+sol(e[1])+'</div>'+
+        '<div class="cat-podium-medal">'+medals[ri]+'</div>'+
         '<div class="cat-podium-bar '+heights[ri]+'" style="background:linear-gradient(180deg,'+col+'33,'+col+'11);border:1px solid '+col+'44;">'+
+          '<span class="cat-podium-pct" style="color:'+col+';">'+p+'%</span>'+
         '</div>';
       podHtml+='</div>';
     });
     podHtml+='</div>';
-    document.getElementById('catBars').innerHTML=podHtml;
+    var restHtml='';
+    if(sorted.length>3){
+      restHtml='<div class="cat-rest-list">';
+      sorted.slice(3).forEach(function(e,i){
+        var ri=i+3;
+        var p=tG>0?Math.round((e[1]/tG)*100):0;
+        var col=CC[ri%CC.length];
+        var emoji=e[0]?e[0].split(' ')[0]:'\u{1F4E6}';
+        var name=e[0]?e[0].replace(/^\S+\s*/,''):e[0];
+        restHtml+='<div><div class="cat-rest-item">'+
+          '<span class="cat-rest-rank">#'+(ri+1)+'</span>'+
+          '<span style="font-size:13px;flex-shrink:0;">'+emoji+'</span>'+
+          '<span class="cat-rest-name">'+name+'</span>'+
+          '<span class="cat-rest-pct">'+p+'%</span>'+
+          '<span class="cat-rest-amt">'+sol(e[1])+'</span>'+
+          '</div>'+
+          '<div class="cat-rest-bar-wrap"><div class="cat-rest-bar-fill" style="width:'+p+'%;background:'+col+';"></div></div>'+
+        '</div>';
+      });
+      restHtml+='</div>';
+    }
+    document.getElementById('catBars').innerHTML=podHtml+restHtml;
   })();
   buildLine(); buildDaily();
 
